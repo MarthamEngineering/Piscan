@@ -1,6 +1,7 @@
+**Piscan**
+--------------------------------------------------------------------------------
+Martham Engineering (www.Marthamengineering.co.uk)
 
-**Piscan by Martham Engineering (www.Marthamengineering.co.uk)**
-================================================================================
 Piscan is 3D scanning software written in C++ using the Qt framework (http://qt.digia.com/) 
 and designed to work with the Piscan hardware https://github.com/MarthamEngineering/Piscan-Hardware
 
