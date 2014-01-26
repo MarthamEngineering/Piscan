@@ -1,0 +1,251 @@
+# translation of de_DE.po to English
+# German translations for PACKAGE package
+# German messages for PACKAGE.
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Arno Wilhelm <a.w@quirxi.net>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: de_DE\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-05-21 00:25+0200\n"
+"PO-Revision-Date: 2009-03-15 05:44+0100\n"
+"Last-Translator: Arno Wilhelm <a.w@quirxi.net>\n"
+"Language-Team: English <en@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:227
+msgid ""
+"\n"
+"Caught exception:\n"
+"\t"
+msgstr ""
+"\n"
+"Ausnahme Fehler:\n"
+"\t"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:222
+msgid ""
+"\n"
+"Caught runtime_error:\n"
+"\t"
+msgstr ""
+"\n"
+"Laufzeit Fehler:\n"
+"\t"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:40
+msgid ""
+"\n"
+"Scan3D analyzes a set of jpg frames created with a 3D scanner setup and "
+"outputs the extracted 3D data in AC3D file format.\n"
+msgstr ""
+"\n"
+"Scan3D analysiert - von einem 3D Scanner generierte - Einzelbilder im jpeg "
+"Format und gibt die extrahierten 3D Daten im AC3D Format aus.\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:47
+msgid ""
+"\n"
+"See: http://www.sjbaker.org/wiki/index.php?title=A_Simple_3D_Scanner\n"
+msgstr ""
+"\n"
+"Siehe: http://www.sjbaker.org/wiki/index.php?title=A_Simple_3D_Scanner\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:41
+msgid ""
+"\n"
+"USAGE:\n"
+"\tScan3D.exe [-h] [[-i='input directory'] [-o='output file'] [OPTION=value]"
+"*]\n"
+"\n"
+msgstr ""
+"\n"
+"Anwendung:\n"
+"\tScan3D.exe [-h] [[-i='Eingabeverzeichniss'] [-o='Ausgabedatei'] "
+"[OPTION=Wert]*]\n"
+"\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:140
+msgid "' to a number!"
+msgstr "' in eine Zahl!"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:86
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:159
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:213
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:165
+msgid "'!"
+msgstr "'!"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:43
+msgid "-h:                   this output.\n"
+msgstr "-h: dieser Hilfetext.\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:44
+msgid ""
+"-i 'input directory': directory where the jpg frames are located (default: "
+"current directory).\n"
+msgstr ""
+"-i 'Eingabeverzeichniss': Verzeichniss wo Einzelbilder im jpg Format sind "
+"(standard: aktuelles Verzeichniss).\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:45
+msgid ""
+"-o 'output file':     file where 3D data will be written in AC3D format "
+"(default: standard output).\n"
+"\n"
+msgstr ""
+"-o 'Ausgabe Datei': Datei wohin 3D Daten im AC3D Format geschrieben werden "
+"(standard: Standardausgabe).\n"
+"\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:107
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:173
+msgid ".jpg"
+msgstr ".jpg"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:100
+msgid "/00000000.jpg"
+msgstr "/00000000.jpg"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:174
+msgid ": '"
+msgstr ": '"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:140
+msgid "Error converting '"
+msgstr "Fehler bei Umwandlung von '"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:86
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:213
+msgid "Error opening '"
+msgstr "Fehler beim öffnen von '"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:165
+msgid "Error: cannot find jpg frames in directory '"
+msgstr "Fehler: keine JPG Einzelbilder im Verzeichniss '"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:273
+msgid "Error: invalid angle for LASER_OFFSET !"
+msgstr "Fehler: ungültiger Winkel für LASER_OFFSET !"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:294
+msgid "Error: value for frames to skip (=FRAME_SKIP) cannot be 0 !"
+msgstr ""
+"Fehler: Wert für zu überspringende Einzelbilder (=FRAME_SKIP) darf nicht 0 "
+"sein!"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:301
+msgid "Error: value for lines to skip (=LINE_SKIP) cannot be 0 !"
+msgstr ""
+"Fehler: Wert für zu überspringende Zeilen (=LINE_SKIP) darf nicht 0 sein!"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:280
+msgid "Error: value vor horizontal average (=HORIZ_AVG) cannot be 0 !"
+msgstr ""
+"Fehler: Wert für den horizontalen Durchschnitt (=HORIZ_AVG) darf nicht 0 "
+"sein!"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:287
+msgid "Error: value vor verical average (=VERT_AVG) cannot be 0 !"
+msgstr ""
+"Fehler: Wert für den verticalen Durchschnitt (=VERT_AVG) darf nicht 0 sein!"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:42
+msgid ""
+"OPTIONS: \n"
+"\n"
+msgstr ""
+"OPTIONEN: \n"
+"\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:174
+msgid "Processing frame "
+msgstr "Bearbeitung von Einzelbild "
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/ScanDraiD.cpp:37
+msgid ""
+"The program expects the input frames in jpg format.\n"
+"The single pictures must be numbered from 00000000.jpg upwards.\n"
+"All angles are in degrees, all distances are in meters and parameters are "
+"case sensitive.\n"
+"\n"
+"CAMERA_DISTANCE: The distance from camera to center of turntable in meter "
+"(required/cannot be <=0).\n"
+"LASER_OFFSET:    The angle between the centerline of the camera and the "
+"laser - should be about 15 degrees (required).\n"
+"CAMERA_HFOV:     This is the camera lens angle (default: 50.0 degrees).\n"
+"CAMERA_VFOV:     Leave this alone, unless you are working with an unusual "
+"kind of camera such as an HDTV camera\n"
+"                 which doesn't have the usual aspect ratios (default: "
+"CAMERA_HFOV*4.0/5.0 degrees).\n"
+"\n"
+"    Additionally, you might want to change:\n"
+"HORIZ_AVG:       The number of consecutive horizontal points to average "
+"together to smooth out the surface (default: 10/cannot be 0).\n"
+"VERT_AVG:        The number of consecutive vertical points to average "
+"together to smooth out the surface (default: 10/cannot be 0).\n"
+"    Increasing these numbers gets rid of odd spikes and other small errors - "
+"but reduces the number\n"
+"    of polygons making up the final model and thereby reduces the precision "
+"of the final model.\n"
+"\n"
+"FRAME_SKIP:      Use only every n'th frame for speed (default: 1/cannot be "
+"0).\n"
+"LINE_SKIP:       Use only every n'th scanline for speed (default: 1/cannot "
+"be 0)."
+msgstr ""
+"Dieses Programm verarbeitet Einzelbilder im jpeg Format.\n"
+"Diese Einzelbilder müssen von 00000000.jpg aufwärts nummeriert/benannt "
+"sein.\n"
+"Alle Winkel sind in Grad, alle Entfernungen in Meter und die einzelnen "
+"Optionen berücksichtigen Gross. -und Kleinschreibung.\n"
+"\n"
+"CAMERA_DISTANCE: Die Entfernung von der Kamera zum Mittelpunkt des "
+"Drehtellers in Meter (zwingend nötig/darf nicht <=0 sein).\n"
+"LASER_OFFSET:    Der Winkel zwischen Zentrumslinien von Kamera und Laser - "
+"sollte ungefähr 15 Grad sein (zwingend nötig).\n"
+"CAMERA_HFOV:     Das ist die Brennweite der Kamera (standard: 50.0 Grad).\n"
+"CAMERA_VFOV:     Sollte nicht geändert werden solange man nicht mit "
+"ungewöhnlichen Kameras wie z.B.: HDTV Kameras arbeitet\n"
+"                 welche kein Standardbildformat aufweisen (standard: "
+"CAMERA_HFOV*4.0/5.0 Grad).\n"
+"\n"
+"    Zusätzlich können noch folgende Optionen angepasst werden:\n"
+"HORIZ_AVG:       Die Zahl von aufeinanderfolgenden horizontalen Punkten "
+"welche zusammengefasst werden, um die Oberfläche glatter zu machen "
+"(standard: 10/darf nicht 0 sein).\n"
+"VERT_AVG:        Die Zahl von aufeinanderfolgenden vertikalen Punkten welche "
+"zusammengefasst werden, um die Oberfläche glatter zu machen (standard: 10/"
+"darf nicht 0 sein).\n"
+"    Werden diese Zahlen vergrössert, werden Unregelmässigkeiten in der "
+"Oberfläche unterdrückt, aber es wird dadurch auch die Zahl der Dreiecke im "
+"Modell verkleinert und damit die Genauigkeit des Modells.\n"
+"\n"
+"FRAME_SKIP:      Verwendet nur jedes n'te Einzelbild zur Erhöhung der "
+"Verarbeitungsgeschwindigkeit (standard: 1/darf nicht 0 sein).\n"
+"LINE_SKIP:       Verwendet nur jede n'te Bildzeile zur Erhöhung der "
+"Verarbeitungsgeschwindigkeit (standard: 1/darf nicht 0 sein)."
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/main.cpp:159
+msgid "Unknown configuration parameter '"
+msgstr "Unbekannter Konfigurationsparameter '"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/Jpeg.cpp:54
+msgid "readJPEG"
+msgstr "readJPEG"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/Jpeg.cpp:69
+#, c-format
+msgid "readJPEG: %s has %d components?!?\n"
+msgstr "readJPEG: %s hat %d Komponenten?!?\n"
+
+#: /home/quirxi/ScanDraiD/ScanDraiD/src/Jpeg.cpp:55
+#, c-format
+msgid "readJPEG: Can't open %s for reading\n"
+msgstr "readJPEG: Kann %s nicht zum Lesen öffnen\n"
