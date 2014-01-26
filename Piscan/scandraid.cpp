@@ -39,78 +39,19 @@
 
 namespace scanDraiD {
 
-
-////////////////////////////////////////////////////////////////////////////////
-// static
-////////////////////////////////////////////////////////////////////////////////
 const float ScanDraiD::DEGREES_TO_RADIANS(3.14159/180.0);
 
-/*
-std::string ScanDraiD::describeConfiguration()
-{
-    return std::string(gettext("The program expects the input frames in jpg format.\n"
-"The single pictures must be numbered from 00000000.jpg upwards.\n"
-"All angles are in degrees, all distances are in meters and parameters are case sensitive.\n"
-"\n"
-"CAMERA_DISTANCE: The distance from camera to center of turntable in mm (required/cannot be <=0).\n"
-"LASER_OFFSET:    The angle between the centerline of the camera and the laser - should be about 15 degrees (required).\n"
-"CAMERA_HFOV:     This is the camera lens angle (default: 50.0 degrees).\n"
-"CAMERA_VFOV:     Leave this alone, unless you are working with an unusual kind of camera such as an HDTV camera\n"
-"                 which doesn't have the usual aspect ratios (default: CAMERA_HFOV*4.0/5.0 degrees).\n"
-"\n"
-"    Additionally, you might want to change:\n"
-"HORIZ_AVG:       The number of consecutive horizontal points to average together to smooth out the surface (default: 10/cannot be 0).\n"
-"VERT_AVG:        The number of consecutive vertical points to average together to smooth out the surface (default: 10/cannot be 0).\n"
-"    Increasing these numbers gets rid of odd spikes and other small errors - but reduces the number\n"
-"    of polygons making up the final model and thereby reduces the precision of the final model.\n"
-"\n"
-"FRAME_SKIP:      Use only every n'th frame for speed (default: 1/cannot be 0).\n"
-"LINE_SKIP:       Use only every n'th scanline for speed (default: 1/cannot be 0).")
-);
-}
-*/
-
-////////////////////////////////////////////////////////////////////////////////
 ScanDraiD::ScanDraiD()
-   /* : cameraHFov_(50.0), cameraVFov_(cameraHFov_*4.0/5.0),
-      horizAvg_(10), vertAvg_(10), frameSkip_(1), lineSkip_(1),
-      cameraDistance_(0), laserOffset_(0),
-      numberFrames_(0), numberPoints_(0)
-*/
-{;}
-////////////////////////////////////////////////////////////////////////////////
-ScanDraiD::~ScanDraiD()
-{;}
-////////////////////////////////////////////////////////////////////////////////
-void ScanDraiD::convertAngleSideAngle2SideAngleSide(float angA, const float lenB, float angC,
-     float* const lenA, float* const angB, float* const lenC) const
-     throw()
 {
-    /* Find the missing angle */
-    float bb = 180.0 - (angA + angC);
-    if (angB) *angB = bb;
 
-    /* Convert everything to radians */
-    angA *= DEGREES_TO_RADIANS;
-    angC *= DEGREES_TO_RADIANS;
-    bb   *= DEGREES_TO_RADIANS;
-
-    /* Use Sine Rule */
-    float sinB = sin(bb);
-    if (sinB == 0.0)
-    {
-        if (lenA)
-            *lenA = lenB / 2.0;  /* One valid interpretation */
-        if (lenC)
-            *lenC = lenB / 2.0;
-    }
-    else
-    {
-        if (lenA) *lenA = lenB * sin(angA) / sinB;
-        if (lenC) *lenC = lenB * sin(angC) / sinB;
-    }
 }
-////////////////////////////////////////////////////////////////////////////////
+
+ScanDraiD::~ScanDraiD()
+{
+
+}
+
+
 void ScanDraiD::getNumberOfFrames(const std::string& path2Frames)
     throw()
 {
@@ -125,7 +66,7 @@ void ScanDraiD::getNumberOfFrames(const std::string& path2Frames)
         config.open(framePath.str().c_str());
     }
 }
-////////////////////////////////////////////////////////////////////////////////
+
 void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned int frameNr, std::vector<frame>& vecFrames) //const
     throw()
 {
@@ -134,9 +75,7 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
     const int width(jpg.getWidth());
     /** @todo is numberPoints_ necessary or can we use a more flexible aproach ? e.g just using the number of found bright pixels ? */
     numberPoints_ = jpg.getHeight() / lineSkip_;
-    vecFrames.push_back(frame());
-    frame& ref2Frame = vecFrames.back();
-    ref2Frame.points_.reserve(numberPoints_);
+
     float frameAngle = static_cast<float>(frameNr) * (360.0/static_cast<float>(numberFrames_));
     float x(0.0), y(0.0), z(0.0), brightness(0.0), max(0.0), radius(0.0), cameraAngle(0.0);
     unsigned int px(0);
@@ -163,7 +102,8 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
             /**
             * @todo use swap here ?
             */
-           
+
+
             if (brightness > max)
             {
                 max = brightness;
@@ -173,10 +113,20 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
         
         //Quick and Dirty method to ignore dark pixels
         if (maxpos == -1){
-                ref2Frame.points_.push_back(point(0,0,0));
+
+            qDebug() << "No laser detected";
+                //ref2Frame.points_.push_back(point(0,0,0));
             }else{
+
+            vecFrames.push_back(frame());
+            frame& ref2Frame = vecFrames.back();
+            ref2Frame.points_.reserve(numberPoints_);
+
             cameraAngle = cameraHFov_ * (0.5 - static_cast<float>(maxpos) / static_cast<float>(width));
-            convertAngleSideAngle2SideAngleSide(cameraAngle, cameraDistance_, laserOffset_, &radius, 0, 0);
+            //convertAngleSideAngle2SideAngleSide(cameraAngle, cameraDistance_, laserOffset_, &radius, 0, 0);
+
+            float pointAngle = 180.0 - cameraAngle + laserOffset_;
+            radius = cameraDistance_ * sin(cameraAngle * DEGREES_TO_RADIANS) / sin(pointAngle * DEGREES_TO_RADIANS);
 
             x = radius * sin(frameAngle * DEGREES_TO_RADIANS);
             y = radius * cos(frameAngle * DEGREES_TO_RADIANS);
@@ -189,7 +139,8 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
         }
     }
 }
-////////////////////////////////////////////////////////////////////////////////
+
+
 void ScanDraiD::processFrames(const std::string& path2Frames, std::stringstream& scanResult, std::string& fileType)
     throw (std::runtime_error)
 {

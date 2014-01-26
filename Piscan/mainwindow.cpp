@@ -188,9 +188,9 @@ void MainWindow::on_pushButtonProcessScan_clicked()
     scanner.processFrames(path2frames, scanResult, fileType);
 
     updateStatusBar("Writing scan to file", 0);
-    std::ofstream output3d(inDir.toUtf8() + "/scan.ply");
-    output3d << scanResult.str() << std::flush;
-    output3d.close();
+    //std::ofstream output3d(inDir.toUtf8() + "/scan.ply");
+    //output3d << scanResult.str() << std::flush;
+    //output3d.close();
     updateStatusBar("Scan Complete", 3000);
 
 

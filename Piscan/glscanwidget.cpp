@@ -209,7 +209,7 @@ void GLScanWidget::drawPoint(float x, float y, float z){
 
     z = 0.0 - z;
 
-    qDebug() << "x:" << x << " y:" << y << " z:" << z;
+    //qDebug() << "x:" << x << " y:" << y << " z:" << z;
 
 
     points.push_back(point());
@@ -220,7 +220,7 @@ void GLScanWidget::drawPoint(float x, float y, float z){
 
     if (z < zMin){
         zMin = z;
-        qDebug() << "zMin:" << zMin;
+        //qDebug() << "zMin:" << zMin;
     }
 
     numberPoints++;

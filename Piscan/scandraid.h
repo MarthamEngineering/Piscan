@@ -96,14 +96,7 @@ private:
     {
         std::vector<point> points_;
     };
-    /**
-    * Converts two Angles with a Side (Angle-Side-Angle) into Side-Angle-Side -
-    * the remaining facts from the triangle.
-    * @todo reorder parameter list ?
-    */
-    void convertAngleSideAngle2SideAngleSide(float angA, const float lenB, float angC, float* const lenA,
-                                      float* const angB, float* const lenC) const
-        throw();
+
     void getNumberOfFrames(const std::string& path2Frames)
         throw();
     /*
