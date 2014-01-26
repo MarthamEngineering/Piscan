@@ -14,7 +14,7 @@
 */
 
 #include <math.h>
-#include "Image.hpp"
+#include "image.h"
 
 namespace scanDraiD {
 

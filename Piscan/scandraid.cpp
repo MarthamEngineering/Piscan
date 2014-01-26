@@ -32,8 +32,8 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h>
-#include "Jpeg.hpp"
-#include "ScanDraiD.hpp"
+#include "jpeg.h"
+#include "scandraid.h"
 
 //#include "mainwindow.h"
 

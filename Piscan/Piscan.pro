@@ -8,22 +8,22 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = ScanDraid
+TARGET = Piscan
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ScanDraiD.cpp \
-    Jpeg.cpp \
-    Image.cpp \
-    glscanwidget.cpp
+    glscanwidget.cpp \
+    scandraid.cpp \
+    jpeg.cpp \
+    image.cpp
 
 HEADERS  += mainwindow.h \
-    ScanDraiD.hpp \
-    Jpeg.hpp \
-    Image.hpp \
-    glscanwidget.h
+    glscanwidget.h \
+    scandraid.h \
+    jpeg.h \
+    image.h
 
 LIBS += -L/usr/lib -ljpeg
 

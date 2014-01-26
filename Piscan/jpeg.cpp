@@ -22,7 +22,7 @@ extern "C"
 #include <jpeglib.h>
 #include <jerror.h>
 }
-#include "Jpeg.hpp"
+#include "jpeg.h"
 
 namespace scanDraiD {
 

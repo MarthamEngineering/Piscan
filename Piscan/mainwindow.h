@@ -20,7 +20,7 @@
 #include <QMainWindow>
 #include <map>
 #include <string>
-#include "ScanDraiD.hpp"
+#include "scandraid.h"
 
 
 namespace Ui {

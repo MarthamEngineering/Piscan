@@ -31,7 +31,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <map>
-#include "ScanDraiD.hpp"
+#include "scandraid.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

@@ -16,7 +16,7 @@
 #ifndef ___SCANDRAID___JPEG___
 #define ___SCANDRAID___JPEG___
 
-#include "Image.hpp"
+#include "image.h"
 
 namespace scanDraiD {
 
