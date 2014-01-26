@@ -11,4 +11,4 @@ Piscan is based on sjbakers 'A Simple 3D Scanner' http://www.sjbaker.org/wiki/in
 --------------------------------------------------------------------------------
 The current state is "Pre-Alpha", more of a proof of concept and it is not ready for end users.
 Feature requests, pull requests, bugfixes and bug reports are welcomed. 
---------------------------------------------------------------------------------
+
