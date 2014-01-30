@@ -1,4 +1,0 @@
-Image.o: Image.cpp Image.hpp
-Jpeg.o: Jpeg.cpp Jpeg.hpp Image.hpp
-main.o: main.cpp ScanDraiD.hpp
-ScanDraiD.o: ScanDraiD.cpp Jpeg.hpp Image.hpp ScanDraiD.hpp
