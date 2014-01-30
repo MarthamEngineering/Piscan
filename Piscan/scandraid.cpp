@@ -25,14 +25,13 @@
 */
 
 #include <QDebug>
-//#include <QVariant>
+#include <QImage>
 
 #include <libintl.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <math.h>
-#include "jpeg.h"
 #include "scandraid.h"
 
 //#include "mainwindow.h"
@@ -70,13 +69,12 @@ void ScanDraiD::getNumberOfFrames(const std::string& path2Frames)
 void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned int frameNr, std::vector<frame>& vecFrames) //const
     throw()
 {
-    scanDraiD::Jpeg jpg;
+    QImage jpg;
     jpg.load(fileName.c_str());
-    const int width(jpg.getWidth());
-    /** @todo is numberPoints_ necessary or can we use a more flexible aproach ? e.g just using the number of found bright pixels ? */
-    numberPoints_ = jpg.getHeight() / lineSkip_;
+    const int width(jpg.width());
 
-    float frameAngle = static_cast<float>(frameNr) * (360.0/static_cast<float>(numberFrames_));
+    /** @todo is numberPoints_ necessary or can we use a more flexible aproach ? e.g just using the number of found bright pixels ? */
+    numberPoints_ = jpg.height() / lineSkip_;
     float x(0.0), y(0.0), z(0.0), brightness(0.0), max(0.0), radius(0.0), cameraAngle(0.0);
     unsigned int px(0);
     int maxpos(-1);
@@ -90,7 +88,7 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
         maxpos = -1;
         for (int i = 0; i < width; ++i)
         {
-            px = jpg.getPixel(i, j*lineSkip_);
+            px = jpg.pixel(i, j*lineSkip_);
             //Bitshift the RGB value and extract just the RED colour brightness
             //brightness = (static_cast<float>((px >> 16) & 0xFF));
                          
@@ -113,26 +111,22 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
         
         //Quick and Dirty method to ignore dark pixels
         if (maxpos == -1){
-
             qDebug() << "No laser detected";
-                //ref2Frame.points_.push_back(point(0,0,0));
             }else{
 
+            float frameAngle = static_cast<float>(frameNr) * (360.0/static_cast<float>(numberFrames_));
             vecFrames.push_back(frame());
             frame& ref2Frame = vecFrames.back();
             ref2Frame.points_.reserve(numberPoints_);
-
             cameraAngle = cameraHFov_ * (0.5 - static_cast<float>(maxpos) / static_cast<float>(width));
-            //convertAngleSideAngle2SideAngleSide(cameraAngle, cameraDistance_, laserOffset_, &radius, 0, 0);
-
             float pointAngle = 180.0 - cameraAngle + laserOffset_;
             radius = cameraDistance_ * sin(cameraAngle * DEGREES_TO_RADIANS) / sin(pointAngle * DEGREES_TO_RADIANS);
 
             x = radius * sin(frameAngle * DEGREES_TO_RADIANS);
             y = radius * cos(frameAngle * DEGREES_TO_RADIANS);
             z = atan((cameraVFov_ * DEGREES_TO_RADIANS / 2.0)) * 2.0 * cameraDistance_ * static_cast<float>(j) / static_cast<float>(numberPoints_);
-            ref2Frame.points_.push_back(point(x,y,z));
 
+            ref2Frame.points_.push_back(point(x,y,z));
             emit addPointScanView(x, y, z);
             //qDebug() << "x: " << x << " y: " << y << " x: " << z ;
 
@@ -141,7 +135,7 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
 }
 
 
-void ScanDraiD::processFrames(const std::string& path2Frames, std::stringstream& scanResult, std::string& fileType)
+void ScanDraiD::start(const std::string& path2Frames)//, std::stringstream& scanResult, std::string& fileType)
     throw (std::runtime_error)
 {
     // @todo replace member numberFrames_ with variable !?
@@ -166,134 +160,9 @@ void ScanDraiD::processFrames(const std::string& path2Frames, std::stringstream&
         processSingleFrame(framePath.str(), curFrameNr, vecFrames);
         framePath.str("");
     }
-    //Check the desired output format
-    if (fileType == "ac" || fileType == "acc"){
-    createAC3DFile(vecFrames, scanResult);
-    } 
-    else if (fileType == "ply" || fileType == "PLY"){
-    createPlyFile(vecFrames, scanResult);
-    }
-}
-////////////////////////////////////////////////////////////////////////////////
-void ScanDraiD::createPlyFile(const std::vector<frame>& vecFrames, std::stringstream& file3D) const
-    throw()
-{
-    int num_outframes = numberFrames_ / horizAvg_;
-    int num_outpoints = numberPoints_ / vertAvg_;
-
-    file3D << "ply\n";
-    file3D << "format ascii 1.0\n";
-    file3D << "element vertex " << num_outpoints*num_outframes << "\n";
-    file3D << "property float x\n";
-    file3D << "property float y\n";
-    file3D << "property float z\n";
-   // file3D << "element face " << num_outframes*(num_outpoints-1)*2 << "\n";
-   // file3D << "property list uchar int vertex_index\n";
-    file3D << "end_header\n";
-
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        for(int i = 0; i < num_outpoints; ++i)
-        {
-            point myPoint(0.0,0.0,0.0);
-            for(unsigned int ff = 0; ff < horizAvg_; ++ff)
-            {
-                for(unsigned int ii = 0; ii < vertAvg_; ++ii)
-                {
-                    myPoint.x_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].x_;
-                    myPoint.y_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].y_;
-                    myPoint.z_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].z_;
-                }
-            }
-            myPoint.x_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.y_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.z_ /= static_cast<float>(horizAvg_*vertAvg_);
-            file3D << myPoint.x_ << " " << myPoint.y_ << " " << myPoint.z_ << "\n";
-        }
-    }
-
-/*
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        int ff = (f==num_outframes-1) ? 0 : f+1;
-        for(int i = 0; i < num_outpoints-1; ++i)
-        {
-            int ii = i+1;
-            file3D << "3 " << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << ff*num_outpoints+i << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << f*num_outpoints+i << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << f*num_outpoints+ii << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << f*num_outpoints+i  << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-        }
-    }
-*/
-}
-////////////////////////////////////////////////////////////////////////////////
-void ScanDraiD::createAC3DFile(const std::vector<frame>& vecFrames, std::stringstream& file3D) const
-    throw()
-{
-    int num_outframes = numberFrames_ / horizAvg_;
-    int num_outpoints = numberPoints_ / vertAvg_;
-
-    file3D << "AC3Db\n";
-    file3D << "MATERIAL \"ac3dmat1\" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10  trans 0\n";
-    file3D << "OBJECT world\n";
-    file3D << "kids 1\n";
-    file3D << "OBJECT poly\n";
-    file3D << "name \"scanDraiD\"\n";
-    file3D << "loc 0.0 0.0 0.0\n";
-    file3D << "numvert " << num_outpoints*num_outframes << "\n";
-
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        for(int i = 0; i < num_outpoints; ++i)
-        {
-            point myPoint(0.0,0.0,0.0);
-            for(unsigned int ff = 0; ff < horizAvg_; ++ff)
-            {
-                for(unsigned int ii = 0; ii < vertAvg_; ++ii)
-                {
-                    myPoint.x_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].x_;
-                    myPoint.y_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].y_;
-                    myPoint.z_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].z_;
-                }
-            }
-            myPoint.x_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.y_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.z_ /= static_cast<float>(horizAvg_*vertAvg_);
-            file3D << myPoint.x_ << " " << myPoint.y_ << " " << myPoint.z_ << "\n";
-        }
-    }
-    file3D << "numsurf " << num_outframes*(num_outpoints-1)*2 << "\n";
-
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        int ff = (f==num_outframes-1) ? 0 : f+1;
-        for(int i = 0; i < num_outpoints-1; ++i)
-        {
-            int ii = i+1;
-
-            file3D << "SURF 0x10\n";
-            file3D << "mat 0\n";
-            file3D << "refs 3\n";
-            file3D << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << ff*num_outpoints+i << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << f*num_outpoints+i << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "SURF 0x10\n";
-            file3D << "mat 0\n";
-            file3D << "refs 3\n";
-            file3D << f*num_outpoints+ii << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << f*num_outpoints+i  << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-        }
-    }
-    file3D << "kids 0\n";
 }
 
-////////////////////////////////////////////////////////////////////////////////
 // setters
-////////////////////////////////////////////////////////////////////////////////
 void ScanDraiD::setCameraHFov(const float cameraHFov, bool adjustCameraVFov)
     throw (std::runtime_error)
 {
@@ -354,51 +223,6 @@ void ScanDraiD::setLineSkip(const unsigned int lineSkip)
         throw std::runtime_error(gettext("Error: value for lines to skip (=LINE_SKIP) cannot be 0 !"));
     lineSkip_=lineSkip;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// getters
-////////////////////////////////////////////////////////////////////////////////
-float ScanDraiD::getCameraHFov() const
-    throw()
-{
-    return cameraHFov_;
-}
-float ScanDraiD::getCameraVFov() const
-    throw()
-{
-    return cameraVFov_;
-}
-float ScanDraiD::getCameraDistance() const
-    throw()
-{
-    return cameraDistance_;
-}
-float ScanDraiD::getLaserOffset() const
-    throw()
-{
-    return laserOffset_;
-}
-unsigned int ScanDraiD::getHorizontalAverage() const
-    throw()
-{
-    return horizAvg_;
-}
-unsigned int ScanDraiD::getVerticalAverage() const
-    throw()
-{
-    return vertAvg_;
-}
-unsigned int ScanDraiD::getFrameSkip() const
-    throw()
-{
-    return frameSkip_;
-}
-unsigned int ScanDraiD::getLineSkip() const
-    throw()
-{
-    return lineSkip_;
-}
-
 
 } // namespace scanDraiD
 

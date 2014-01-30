@@ -16,15 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     glscanwidget.cpp \
     scandraid.cpp \
-    jpeg.cpp \
-    image.cpp
+    exportfile.cpp
 
 HEADERS  += mainwindow.h \
     glscanwidget.h \
     scandraid.h \
-    jpeg.h \
-    image.h
+    exportfile.h
 
-LIBS += -L/usr/lib -ljpeg
+#LIBS += -L/usr/lib -ljpeg
 
 FORMS    += mainwindow.ui

@@ -225,6 +225,8 @@ void GLScanWidget::drawPoint(float x, float y, float z){
 
     numberPoints++;
 
+    //draw();
+
 
 }
 

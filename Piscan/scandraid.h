@@ -22,13 +22,14 @@
 #include <vector>
 
 #include <QObject>
+#include <QThread>
 
 namespace scanDraiD {
 
 /**
 * TODO
 */
-class ScanDraiD : public QObject
+class ScanDraiD : public QThread
 {
     Q_OBJECT
 
@@ -38,7 +39,7 @@ public:
     // misc
     static const float DEGREES_TO_RADIANS;
     static std::string describeConfiguration();
-    void processFrames(const std::string& path2Frames, std::stringstream& scanResult, std::string& fileType)
+    void start(const std::string& path2Frames)//, std::stringstream& scanResult, std::string& fileType)
         throw (std::runtime_error);
 
     // getters
@@ -104,10 +105,7 @@ private:
     */
     void processSingleFrame(const std::string& fileName, const unsigned int frameNr, std::vector<frame>& vecFrames) ///const
         throw();
-    void createAC3DFile(const std::vector<frame>& vecFrames, std::stringstream& file3D) const
-        throw();
-    void createPlyFile(const std::vector<frame>& vecFrames, std::stringstream& file3D) const
-        throw();
+
 
     // configuration parameters
     /** Focal distance of camera lense. Default: 50.0 degrees. */
