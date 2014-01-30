@@ -26,11 +26,13 @@
 
 #include <QDebug>
 #include <QImage>
+#include <QDir>
+#include <QFileInfo>
 
 #include <libintl.h>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
+//#include <fstream>
+//#include <iostream>
+//#include <iomanip>
 #include <math.h>
 #include "scandraid.h"
 
@@ -50,31 +52,48 @@ ScanDraiD::~ScanDraiD()
 
 }
 
-
-void ScanDraiD::getNumberOfFrames(const std::string& path2Frames)
-    throw()
+void ScanDraiD::start(QString inDir)//, std::stringstream& scanResult, std::string& fileType)
+    throw (std::runtime_error)
 {
-    std::stringstream framePath(path2Frames+gettext("/00000000.jpg"));
-    std::ifstream config(framePath.str().c_str());
-    for (int frameNr=1; config.good(); ++frameNr)
+    // @todo replace member numberFrames_ with variable !?
+    //getNumberOfFrames(inDir);
+    QDir dir(inDir);
+    QStringList filters;
+    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.gif";
+    QFileInfoList imageFileList = dir.entryInfoList(filters, QDir::Files|QDir::NoDotAndDotDot);
+    numberFrames_ = imageFileList.size();
+
+
+    if (0==numberFrames_)
+        throw std::runtime_error(gettext("Error: cannot find jpg frames in directory '") );
+
+    std::vector<frame> vecFrames;
+    vecFrames.reserve(numberFrames_);
+
+    for (unsigned int curFrameNr = 0; curFrameNr<numberFrames_; ++curFrameNr)
     {
-        numberFrames_=frameNr;
-        config.close();
-        framePath.str("");
-        framePath << path2Frames << "/" << std::setw(8) << std::setfill('0') << frameNr << gettext(".jpg") << std::flush;
-        config.open(framePath.str().c_str());
+        QFileInfo imageFile = imageFileList.at(curFrameNr);
+        QString framePath = inDir + "/" + imageFile.fileName();
+
+        //create a QVarant to return the percentage complete to the UI
+        float percentage =  nearbyint(100 * (((float)curFrameNr+1) / (float)numberFrames_)) ;
+        //emit the percentage completeback to the UI
+        emit percentageComplete("Processing Frames: " + QString::number(percentage) + "%", 5000);
+
+        processSingleFrame(framePath.toStdString(), curFrameNr, vecFrames);
+        //framePath.str("");
     }
 }
 
 void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned int frameNr, std::vector<frame>& vecFrames) //const
     throw()
 {
-    QImage jpg;
-    jpg.load(fileName.c_str());
-    const int width(jpg.width());
+    QImage image;
+    image.load(fileName.c_str());
+    const int width(image.width());
 
     /** @todo is numberPoints_ necessary or can we use a more flexible aproach ? e.g just using the number of found bright pixels ? */
-    numberPoints_ = jpg.height() / lineSkip_;
+    numberPoints_ = image.height() / lineSkip_;
     float x(0.0), y(0.0), z(0.0), brightness(0.0), max(0.0), radius(0.0), cameraAngle(0.0);
     unsigned int px(0);
     int maxpos(-1);
@@ -88,7 +107,7 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
         maxpos = -1;
         for (int i = 0; i < width; ++i)
         {
-            px = jpg.pixel(i, j*lineSkip_);
+            px = image.pixel(i, j*lineSkip_);
             //Bitshift the RGB value and extract just the RED colour brightness
             //brightness = (static_cast<float>((px >> 16) & 0xFF));
                          
@@ -134,33 +153,6 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
     }
 }
 
-
-void ScanDraiD::start(const std::string& path2Frames)//, std::stringstream& scanResult, std::string& fileType)
-    throw (std::runtime_error)
-{
-    // @todo replace member numberFrames_ with variable !?
-    getNumberOfFrames(path2Frames);
-    if (0==numberFrames_)
-        throw std::runtime_error(gettext("Error: cannot find jpg frames in directory '") + path2Frames + gettext("'!"));
-
-    std::vector<frame> vecFrames;
-    vecFrames.reserve(numberFrames_);
-
-    std::stringstream framePath;
-    for (unsigned int curFrameNr = 0; curFrameNr<numberFrames_; ++curFrameNr)
-    {
-        framePath << path2Frames << "/" << std::setw(8) << std::setfill('0') << curFrameNr << gettext(".jpg") << std::flush;
-        //std::cerr << gettext("Processing frame ") << curFrameNr+1 << "/" << numberFrames_ << gettext(": '") << framePath.str() << "'\r";
-
-        //create a QVarant to return the percentage complete to the UI
-        float percentage =  nearbyint(100 * (((float)curFrameNr+1) / (float)numberFrames_)) ;
-        //emit the percentage completeback to the UI
-        emit percentageComplete("Processing Frames: " + QString::number(percentage) + "%", 5000);
-
-        processSingleFrame(framePath.str(), curFrameNr, vecFrames);
-        framePath.str("");
-    }
-}
 
 // setters
 void ScanDraiD::setCameraHFov(const float cameraHFov, bool adjustCameraVFov)

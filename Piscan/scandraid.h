@@ -39,7 +39,7 @@ public:
     // misc
     static const float DEGREES_TO_RADIANS;
     static std::string describeConfiguration();
-    void start(const std::string& path2Frames)//, std::stringstream& scanResult, std::string& fileType)
+    void start(QString inDir)//, std::stringstream& scanResult, std::string& fileType)
         throw (std::runtime_error);
 
     // getters
@@ -98,8 +98,8 @@ private:
         std::vector<point> points_;
     };
 
-    void getNumberOfFrames(const std::string& path2Frames)
-        throw();
+  //  void getNumberOfFrames(QString path2Frames)
+  //      throw();
     /*
     * @todo change algo - so that id does not look vor points/vertices where there are non - probably use masking features for that ?
     */

@@ -90,8 +90,6 @@ void MainWindow::setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVarian
         loadSettings();
     }
 
-     //settings.sync();
-
 }
 
 QVariant MainWindow::getSetting(QString setting){
@@ -137,6 +135,8 @@ void MainWindow::on_pushButtonSaveSettings_clicked()
     QVariant FRAME_SKIP = ui->lineEditFrameSkip->text();
     QVariant LINE_SKIP = ui->lineEditLineSkip->text();
 
+    //Add some error checking
+
     setSettings(false, CAMERA_HFOV, CAMERA_VFOV, CAMERA_DISTANCE, LASER_OFFSET, HORIZ_AVG, VERT_AVG, FRAME_SKIP, LINE_SKIP);
 }
 
@@ -160,13 +160,9 @@ void MainWindow::on_pushButtonProcessScan_clicked()
 
     //TO DO - Use native dialog once bug is resolved with multiple windows and the file browser not closing
 
-    QString inDir = QFileDialog::getExistingDirectory(NULL, "Open Directory",QDir::homePath(),QFileDialog::DontUseNativeDialog | QFileDialog::ShowDirsOnly| QFileDialog::DontResolveSymlinks);
+    QString inDir = QFileDialog::getExistingDirectory(NULL, "Open Directory",QDir::homePath(),QFileDialog::DontUseNativeDialog | QFileDialog::DontResolveSymlinks);
 
     if (inDir != ""){
-
-    std::string path2frames = inDir.toStdString();
-    //qDebug() << "Path to image frames: " << inDir << "\n";
-    //std::string fileType = "PLY";
 
     scanDraiD::ScanDraiD scanner;
 
@@ -183,20 +179,8 @@ void MainWindow::on_pushButtonProcessScan_clicked()
     scanner.setFrameSkip(getSetting("FRAME_SKIP").toInt());
     scanner.setLineSkip(getSetting("LINE_SKIP").toInt());
 
-    //setScannerParams(scanner, parameterMap);
-    //std::stringstream scanResult;
-    //scanner.processFrames(path2frames);//, scanResult, fileType);
-
-    scanner.start(path2frames);
-
-    //updateStatusBar("Writing scan to file", 0);
-    //std::ofstream output3d(inDir.toUtf8() + "/scan.ply");
-    //output3d << scanResult.str() << std::flush;
-    //output3d.close();
+    scanner.start(inDir);
     updateStatusBar("Scan Complete", 3000);
-
-
-
 
     }
 }
