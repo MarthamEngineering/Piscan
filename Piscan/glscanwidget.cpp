@@ -92,8 +92,8 @@ void GLScanWidget::wheelEvent(QWheelEvent *event){
     double numDegrees = -event->delta()/8.0;
     double numSteps = numDegrees / 15.0;
     scaling *= pow(1.25, numSteps);
-    if (scaling > 2){
-        scaling = 2;
+    if (scaling > 3){
+        scaling = 3;
     }else if (scaling < 0.25){
         scaling = 0.25;
     }
@@ -127,30 +127,30 @@ void GLScanWidget::paintGL()
     glScalef(scaling, scaling, scaling);
 
     //Draw Z Axis
-    glLineWidth(3.0);
+    glLineWidth(1.5);
     qglColor(Qt::red);
     glBegin(GL_LINES);
     glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, 250);
+    glVertex3f(0, 0, 200);
     glEnd();
     //renderText(0, 0, 260, "z");
     //Draw X Axis
     qglColor(Qt::green);
     glBegin(GL_LINES);
     glVertex3f(0, 0, 0);
-    glVertex3f(250, 0, 0);
+    glVertex3f(125, 0, 0);
     glEnd();
     //Draw X Axis
     qglColor(Qt::blue);
     glBegin(GL_LINES);
     glVertex3f(0, 0, 0);
-    glVertex3f(0, 250, 0);
+    glVertex3f(0, 125, 0);
     glEnd();
 
 
     qglColor(Qt::lightGray);
     int sections = 36;
-    GLfloat radius = 250.0;
+    GLfloat radius = 125;
     GLfloat twoPi = 2.0 * 3.14159;
 
     glBegin(GL_TRIANGLE_FAN);
