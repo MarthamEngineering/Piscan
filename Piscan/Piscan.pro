@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     glscanwidget.cpp \
     scandraid.cpp \
-    exportfile.cpp
+    exportfile.cpp \
+    pointcloud.cpp
 
 HEADERS  += mainwindow.h \
     glscanwidget.h \
     scandraid.h \
-    exportfile.h
+    exportfile.h \
+    pointcloud.h
 
 #LIBS += -L/usr/lib -ljpeg
 

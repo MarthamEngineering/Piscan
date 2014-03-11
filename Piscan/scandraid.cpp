@@ -65,27 +65,24 @@ void ScanDraiD::start(QString inDir)//, std::stringstream& scanResult, std::stri
 
 
     if (0==numberFrames_)
-        throw std::runtime_error(gettext("Error: cannot find jpg frames in directory '") );
-
-    std::vector<frame> vecFrames;
-    vecFrames.reserve(numberFrames_);
+        throw std::runtime_error(gettext("Error: cannot find frames in directory '") );
 
     for (unsigned int curFrameNr = 0; curFrameNr<numberFrames_; ++curFrameNr)
     {
         QFileInfo imageFile = imageFileList.at(curFrameNr);
         QString framePath = inDir + "/" + imageFile.fileName();
 
-        //create a QVarant to return the percentage complete to the UI
+        //Return the percentage complete to the UI
         float percentage =  nearbyint(100 * (((float)curFrameNr+1) / (float)numberFrames_)) ;
         //emit the percentage completeback to the UI
         emit percentageComplete("Processing Frames: " + QString::number(percentage) + "%", 5000);
 
-        processSingleFrame(framePath.toStdString(), curFrameNr, vecFrames);
+        processSingleFrame(framePath.toStdString(), curFrameNr);
         //framePath.str("");
     }
 }
 
-void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned int frameNr, std::vector<frame>& vecFrames) //const
+void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned int frameNr)
     throw()
 {
     QImage image;
@@ -134,19 +131,17 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
             }else{
 
             float frameAngle = static_cast<float>(frameNr) * (360.0/static_cast<float>(numberFrames_));
-            vecFrames.push_back(frame());
-            frame& ref2Frame = vecFrames.back();
-            ref2Frame.points_.reserve(numberPoints_);
             cameraAngle = cameraHFov_ * (0.5 - static_cast<float>(maxpos) / static_cast<float>(width));
             float pointAngle = 180.0 - cameraAngle + laserOffset_;
             radius = cameraDistance_ * sin(cameraAngle * DEGREES_TO_RADIANS) / sin(pointAngle * DEGREES_TO_RADIANS);
 
             x = radius * sin(frameAngle * DEGREES_TO_RADIANS);
             y = radius * cos(frameAngle * DEGREES_TO_RADIANS);
-            z = atan((cameraVFov_ * DEGREES_TO_RADIANS / 2.0)) * 2.0 * cameraDistance_ * static_cast<float>(j) / static_cast<float>(numberPoints_);
+            z = (atan((cameraVFov_ * DEGREES_TO_RADIANS / 2.0)) * 2.0 * cameraDistance_ * (1 - static_cast<float>(j) / static_cast<float>(numberPoints_))); // 1 - j / numberpoints to invert scan
 
-            ref2Frame.points_.push_back(point(x,y,z));
-            emit addPointScanView(x, y, z);
+            emit addPointToCloud(x, y, z);
+
+            //qDebug() << "Image Height: " << image.height();
             //qDebug() << "x: " << x << " y: " << y << " x: " << z ;
 
         }

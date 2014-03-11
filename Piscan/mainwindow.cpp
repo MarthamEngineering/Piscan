@@ -15,6 +15,9 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "scandraid.h"
+#include "exportfile.h"
+//#include "pointcloud.h"
 
 #include <QSettings>
 #include <QDebug>
@@ -31,7 +34,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <map>
-#include "scandraid.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -60,7 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete pointcloud;
     delete ui;
+
 }
 
 
@@ -158,17 +163,25 @@ void MainWindow::loadSettings(){
 void MainWindow::on_pushButtonProcessScan_clicked()
 {
 
+
+
     //TO DO - Use native dialog once bug is resolved with multiple windows and the file browser not closing
 
-    QString inDir = QFileDialog::getExistingDirectory(NULL, "Open Directory",QDir::homePath(),QFileDialog::DontUseNativeDialog | QFileDialog::DontResolveSymlinks);
+    inDir = QFileDialog::getExistingDirectory(NULL, "Open Directory",QDir::homePath(),QFileDialog::DontUseNativeDialog | QFileDialog::DontResolveSymlinks);
 
     if (inDir != ""){
 
+    ui->pushButtonSaveScan->setEnabled(false);
     scanDraiD::ScanDraiD scanner;
+
+    if (pointcloud != NULL)
+        delete pointcloud;
+
+    pointcloud = new pointCloud;
 
     // Make a connection to allow the ScanDraiD scanner object return data.
     connect(&scanner, SIGNAL(percentageComplete(QString, int)), this, SLOT(updateStatusBar(QString,int)));
-    connect(&scanner, SIGNAL(addPointScanView(float,float,float)), ui->GLScanWidgetui, SLOT(drawPoint(float,float,float)));
+    connect(&scanner, SIGNAL(addPointToCloud(float,float,float)), pointcloud, SLOT(addPoint(float,float,float)));
 
     scanner.setCameraHFov(getSetting("CAMERA_HFOV").toFloat(), true);
     scanner.setCameraVFov(getSetting("CAMERA_VFOV").toFloat());
@@ -181,6 +194,14 @@ void MainWindow::on_pushButtonProcessScan_clicked()
 
     scanner.start(inDir);
     updateStatusBar("Scan Complete", 3000);
+    ui->pushButtonSaveScan->setEnabled(true);
+
+    //qDebug() << "Number of points: " << pointcloud->cloudSize();
+
+    ui->GLScanWidgetui->setCloud(pointcloud);
+
+    pointcloud->refineCloud();
+
 
     }
 }
@@ -189,5 +210,19 @@ void MainWindow::updateStatusBar(QString text, int timeOut){
 
     ui->statusBar->showMessage(text, timeOut);
 
+
+}
+
+void MainWindow::on_pushButtonSaveScan_clicked()
+{
+
+    QString fileExtension;
+    QString savefileName = QFileDialog::getSaveFileName(this,"Save File", QString(QDir::homePath() + "/untitled"), ".ply;;.stl", &fileExtension, QFileDialog::DontUseNativeDialog );
+
+    exportfile file(pointcloud);
+
+    connect(&file, SIGNAL(saveComplete(QString, int)), this, SLOT(updateStatusBar(QString,int)));
+
+    file.save(savefileName, fileExtension);
 
 }

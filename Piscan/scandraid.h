@@ -39,7 +39,7 @@ public:
     // misc
     static const float DEGREES_TO_RADIANS;
     static std::string describeConfiguration();
-    void start(QString inDir)//, std::stringstream& scanResult, std::string& fileType)
+    void start(QString inDir)
         throw (std::runtime_error);
 
     // getters
@@ -79,31 +79,13 @@ public:
 
 signals:
     void percentageComplete(QString text, int timeOut);
-    void addPointScanView(float, float, float);
+    void addPointToCloud(float, float, float);
 
 private:
-
-    struct point
-    {
-        point(const float x, const float y, const float z)
-            : x_(x), y_(y), z_(z)
-        {;}
-
-        float x_;
-        float y_;
-        float z_;
-    };
-    struct frame
-    {
-        std::vector<point> points_;
-    };
-
-  //  void getNumberOfFrames(QString path2Frames)
-  //      throw();
     /*
     * @todo change algo - so that id does not look vor points/vertices where there are non - probably use masking features for that ?
     */
-    void processSingleFrame(const std::string& fileName, const unsigned int frameNr, std::vector<frame>& vecFrames) ///const
+    void processSingleFrame(const std::string& fileName, const unsigned int frameNr) ///const
         throw();
 
 

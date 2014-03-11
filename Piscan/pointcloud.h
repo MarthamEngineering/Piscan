@@ -13,32 +13,53 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef EXPORTFILE_H
-#define EXPORTFILE_H
+#ifndef POINTCLOUD_H
+#define POINTCLOUD_H
 
-#include "pointcloud.h"
-
-#include <sstream>
-#include <stdexcept>
-#include <vector>
-
-#include <QString>
 #include <QObject>
 
-class exportfile : public QObject
-{
-        Q_OBJECT
-public:
-    exportfile(pointCloud *cloudPtr);
-    void save(QString saveFileName, QString fileExtension);
+#include <vector>
 
+
+class pointCloud : public QObject
+{
+    Q_OBJECT
+public:
+    explicit pointCloud(QObject *parent = 0);
+    
 signals:
-    void saveComplete(QString text, int timeOut);
+    
+public slots:
+
+    void addPoint(float x, float y, float z);
+    int cloudSize();
+    int errorSize();
+    float getZmin();
+    void refineCloud();
+
+    float X(int i);
+    float Y(int i);
+    float Z(int i);
+
+    float errorX(int i);
+    float errorY(int i);
+    float errorZ(int i);
 
 private:
 
-void createPlyFile(QString saveFileName);
-pointCloud* cloud;
+    struct point {
+
+        float x;
+        float y;
+        float z;
+
+    };
+
+
+    float zMin;
+    std::vector<point> points;
+    std::vector<point> errors;
+    
 };
 
-#endif // EXPORTFILE_H
+#endif // POINTCLOUD_H

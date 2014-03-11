@@ -20,7 +20,9 @@
 #include <QMainWindow>
 #include <map>
 #include <string>
+#include <QtOpenGL>
 #include "scandraid.h"
+#include "pointcloud.h"
 
 
 namespace Ui {
@@ -39,12 +41,9 @@ public:
     
 private slots:
     void on_pushButtonResetSettings_clicked();
-
     void on_pushButtonSaveSettings_clicked();
-
     void on_pushButtonProcessScan_clicked();
-
-
+    void on_pushButtonSaveScan_clicked();
 
 public slots:
     void updateStatusBar(QString text, int timeOut);
@@ -55,6 +54,10 @@ private:
     void setScannerParams(scanDraiD::ScanDraiD& scanner, const std::map<std::string,std::string>& paramMap);
     void setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVariant CAMERA_VFOV, QVariant CAMERA_DISTANCE, QVariant LASER_OFFSET, QVariant HORIZ_AVG, QVariant VERT_AVG, QVariant FRAME_SKIP, QVariant LINE_SKIP);
     void loadSettings();
+
+    pointCloud *pointcloud;
+
+    QString inDir;
 };
 
 #endif // MAINWINDOW_H

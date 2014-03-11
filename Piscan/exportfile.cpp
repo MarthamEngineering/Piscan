@@ -1,124 +1,89 @@
+/*
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "exportfile.h"
 
+#include <vector>
 
-exportfile::exportfile()
+#include <QFile>
+#include <QTextStream>
+#include <QDebug>
+
+#include <math.h>
+//#include <QString>
+
+exportfile::exportfile(pointCloud *cloudPtr)
 {
+    cloud = cloudPtr;
+
 }
-/*
 
-void exportfile::createPlyFile(const std::vector<frame>& vecFrames, std::stringstream& file3D) const
-    throw()
+void exportfile::save(QString saveFileName, QString fileExtension)
 {
-    int num_outframes = numberFrames_ / horizAvg_;
-    int num_outpoints = numberPoints_ / vertAvg_;
 
-    file3D << "ply\n";
-    file3D << "format ascii 1.0\n";
-    file3D << "element vertex " << num_outpoints*num_outframes << "\n";
-    file3D << "property float x\n";
-    file3D << "property float y\n";
-    file3D << "property float z\n";
+    if (fileExtension == ".ply"){
+
+        //qDebug() << saveFileName + fileExtension;
+        createPlyFile(saveFileName + fileExtension);
+
+    }
+
+}
+
+void exportfile::createPlyFile(QString saveFileName)
+{
+
+    QFile file(saveFileName);
+    file.open(QIODevice::WriteOnly);
+    QTextStream file3D(&file);
+
+
+    //int num_outframes = numberFrames_ / horizAvg_;
+    //int num_outpoints = numberPoints_ / vertAvg_;
+
+    file3D << "ply" << endl;
+    file3D << "format ascii 1.0" << endl;
+    file3D << "element vertex " << cloud->cloudSize() << endl;
+    file3D << "property float x" << endl;
+    file3D << "property float y" << endl;
+    file3D << "property float z" << endl;
+    file3D << "property float nx" << endl;
+    file3D << "property float ny" << endl;
+    file3D << "property float nz" << endl;
    // file3D << "element face " << num_outframes*(num_outpoints-1)*2 << "\n";
    // file3D << "property list uchar int vertex_index\n";
-    file3D << "end_header\n";
+    file3D << "end_header" << endl;
 
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        for(int i = 0; i < num_outpoints; ++i)
-        {
-            point myPoint(0.0,0.0,0.0);
-            for(unsigned int ff = 0; ff < horizAvg_; ++ff)
-            {
-                for(unsigned int ii = 0; ii < vertAvg_; ++ii)
-                {
-                    myPoint.x_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].x_;
-                    myPoint.y_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].y_;
-                    myPoint.z_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].z_;
-                }
-            }
-            myPoint.x_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.y_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.z_ /= static_cast<float>(horizAvg_*vertAvg_);
-            file3D << myPoint.x_ << " " << myPoint.y_ << " " << myPoint.z_ << "\n";
-        }
+    for(int i=0; i < cloud->cloudSize(); i++){
+        file3D << cloud->X(i) << " ";
+        file3D << cloud->Y(i) << " ";
+        file3D << cloud->Z(i) << endl;
+
+    }
+    for(int i=0; i < cloud->cloudSize(); i++){
+        //Assume all normal point outwards
+        float normalLength = sqrt((cloud->X(i) * cloud->X(i)) + (cloud->Y(i) * cloud->Y(i)) + (0.0 * 0.0));
+
+        file3D << cloud->X(i) / (normalLength / 2) << " ";
+        file3D << cloud->Y(i) / (normalLength / 2) << " ";
+        file3D << 0.0 << endl;
+
     }
 
-/*
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        int ff = (f==num_outframes-1) ? 0 : f+1;
-        for(int i = 0; i < num_outpoints-1; ++i)
-        {
-            int ii = i+1;
-            file3D << "3 " << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << ff*num_outpoints+i << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << f*num_outpoints+i << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << f*num_outpoints+ii << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "3 " << f*num_outpoints+i  << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-        }
-    }
 
+    file.close();
+    emit saveComplete("Cloud saved to " + saveFileName, 5000);
 }
-////////////////////////////////////////////////////////////////////////////////
-void exportfile::createAC3DFile(const std::vector<frame>& vecFrames, std::stringstream& file3D) const
-    throw()
-{
-    int num_outframes = numberFrames_ / horizAvg_;
-    int num_outpoints = numberPoints_ / vertAvg_;
 
-    file3D << "AC3Db\n";
-    file3D << "MATERIAL \"ac3dmat1\" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10  trans 0\n";
-    file3D << "OBJECT world\n";
-    file3D << "kids 1\n";
-    file3D << "OBJECT poly\n";
-    file3D << "name \"scanDraiD\"\n";
-    file3D << "loc 0.0 0.0 0.0\n";
-    file3D << "numvert " << num_outpoints*num_outframes << "\n";
-
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        for(int i = 0; i < num_outpoints; ++i)
-        {
-            point myPoint(0.0,0.0,0.0);
-            for(unsigned int ff = 0; ff < horizAvg_; ++ff)
-            {
-                for(unsigned int ii = 0; ii < vertAvg_; ++ii)
-                {
-                    myPoint.x_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].x_;
-                    myPoint.y_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].y_;
-                    myPoint.z_ += vecFrames[f*horizAvg_+ff].points_[i*vertAvg_+ii].z_;
-                }
-            }
-            myPoint.x_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.y_ /= static_cast<float>(horizAvg_*vertAvg_);
-            myPoint.z_ /= static_cast<float>(horizAvg_*vertAvg_);
-            file3D << myPoint.x_ << " " << myPoint.y_ << " " << myPoint.z_ << "\n";
-        }
-    }
-    file3D << "numsurf " << num_outframes*(num_outpoints-1)*2 << "\n";
-
-    for(int f = 0; f < num_outframes; ++f)
-    {
-        int ff = (f==num_outframes-1) ? 0 : f+1;
-        for(int i = 0; i < num_outpoints-1; ++i)
-        {
-            int ii = i+1;
-
-            file3D << "SURF 0x10\n";
-            file3D << "mat 0\n";
-            file3D << "refs 3\n";
-            file3D << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << ff*num_outpoints+i << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << f*num_outpoints+i << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << "SURF 0x10\n";
-            file3D << "mat 0\n";
-            file3D << "refs 3\n";
-            file3D << f*num_outpoints+ii << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-            file3D << ff*num_outpoints+ii << " " << static_cast<float>(ff)/static_cast<float>(num_outframes) << " " << static_cast<float>(ii)/static_cast<float>(num_outpoints) << "\n";
-            file3D << f*num_outpoints+i  << " " << static_cast<float>(f)/static_cast<float>(num_outframes) << " " << static_cast<float>(i)/static_cast<float>(num_outpoints) << "\n";
-        }
-    }
-    file3D << "kids 0\n";
-}
-*/
