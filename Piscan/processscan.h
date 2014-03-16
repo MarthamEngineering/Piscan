@@ -13,34 +13,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ___SCANDRAID___
-#define ___SCANDRAID___
+#ifndef ___ProcessScan___
+#define ___ProcessScan___
 
-#include <string>
-#include <sstream>
 #include <stdexcept>
-#include <vector>
 
 #include <QObject>
-#include <QThread>
 
-namespace scanDraiD {
-
-/**
-* TODO
-*/
-class ScanDraiD : public QThread
+class ProcessScan : public QObject
 {
     Q_OBJECT
 
 public:
-    ScanDraiD();
-    ~ScanDraiD();
+    ProcessScan(QString directory);
+    ~ProcessScan();
     // misc
     static const float DEGREES_TO_RADIANS;
     static std::string describeConfiguration();
-    void start(QString inDir)
-        throw (std::runtime_error);
 
     // getters
     float getCameraHFov() const
@@ -77,9 +66,17 @@ public:
     void setLineSkip(const unsigned int lineSkip)
         throw (std::runtime_error);
 
+    void setinDir(QString);
+
+public slots:
+    void start()
+        throw (std::runtime_error);
+
 signals:
     void percentageComplete(QString text, int timeOut);
     void addPointToCloud(float, float, float);
+    void finished();
+    //void error(QString err); impliment error checking later
 
 private:
     /*
@@ -87,6 +84,8 @@ private:
     */
     void processSingleFrame(const std::string& fileName, const unsigned int frameNr) ///const
         throw();
+
+    QString inDir;
 
 
     // configuration parameters
@@ -114,8 +113,5 @@ private:
     /** @todo: removme !? */
     mutable unsigned int numberPoints_;  
 };
-
-
-} // namespace scanDraiD
-#endif // ___SCANDRAID___
+#endif // ___ProcessScan___
 

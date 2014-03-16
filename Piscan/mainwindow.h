@@ -18,10 +18,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <map>
-#include <string>
+#include <QSerialPort>
+
+//#include <map>
+//#include <string>
 #include <QtOpenGL>
-#include "scandraid.h"
+#include "processscan.h"
 #include "pointcloud.h"
 
 
@@ -51,9 +53,14 @@ public slots:
 private:
     Ui::MainWindow *ui;
     void processConfigFile(const std::string& confFile, std::map<std::string,std::string>& paramMap);
-    void setScannerParams(scanDraiD::ScanDraiD& scanner, const std::map<std::string,std::string>& paramMap);
-    void setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVariant CAMERA_VFOV, QVariant CAMERA_DISTANCE, QVariant LASER_OFFSET, QVariant HORIZ_AVG, QVariant VERT_AVG, QVariant FRAME_SKIP, QVariant LINE_SKIP);
+    //void setScannerParams(scanDraiD::ScanDraiD& scanner, const std::map<std::string,std::string>& paramMap);
+    void setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVariant CAMERA_VFOV, QVariant CAMERA_DISTANCE, QVariant LASER_OFFSET, QVariant HORIZ_AVG, QVariant VERT_AVG, QVariant FRAME_SKIP, QVariant LINE_SKIP, QVariant BED_DIA);
     void loadSettings();
+    void getScanFromDevice();
+    void getScanFromFile();
+    QString scanSource;
+
+    QSerialPort *serialport;
 
     pointCloud *pointcloud;
 

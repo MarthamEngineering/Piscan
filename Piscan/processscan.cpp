@@ -21,7 +21,7 @@
  2014-01-05 <dwood@marthamengineering.co.uk>
     -Relicensed from LGPL to GPL
     -Added PLY file output
-    -Converted ScanDraid to a Qt class to use signal and slots
+    -Converted ProcessScan to a Qt class to use signal and slots
 */
 
 #include <QDebug>
@@ -29,30 +29,24 @@
 #include <QDir>
 #include <QFileInfo>
 
-#include <libintl.h>
-//#include <fstream>
-//#include <iostream>
-//#include <iomanip>
 #include <math.h>
-#include "scandraid.h"
+#include "processscan.h"
 
-//#include "mainwindow.h"
+#define DEGREES_TO_RADIANS (3.14159/180.0)
 
-namespace scanDraiD {
+ProcessScan::ProcessScan(QString directory)
+{
 
-const float ScanDraiD::DEGREES_TO_RADIANS(3.14159/180.0);
+    inDir = directory;
 
-ScanDraiD::ScanDraiD()
+}
+
+ProcessScan::~ProcessScan()
 {
 
 }
 
-ScanDraiD::~ScanDraiD()
-{
-
-}
-
-void ScanDraiD::start(QString inDir)//, std::stringstream& scanResult, std::string& fileType)
+void ProcessScan::start()//, std::stringstream& scanResult, std::string& fileType)
     throw (std::runtime_error)
 {
     // @todo replace member numberFrames_ with variable !?
@@ -65,7 +59,7 @@ void ScanDraiD::start(QString inDir)//, std::stringstream& scanResult, std::stri
 
 
     if (0==numberFrames_)
-        throw std::runtime_error(gettext("Error: cannot find frames in directory '") );
+        throw std::runtime_error("Error: cannot find frames in directory '");
 
     for (unsigned int curFrameNr = 0; curFrameNr<numberFrames_; ++curFrameNr)
     {
@@ -80,9 +74,10 @@ void ScanDraiD::start(QString inDir)//, std::stringstream& scanResult, std::stri
         processSingleFrame(framePath.toStdString(), curFrameNr);
         //framePath.str("");
     }
+    emit finished();
 }
 
-void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned int frameNr)
+void ProcessScan::processSingleFrame(const std::string& fileName, const unsigned int frameNr)
     throw()
 {
     QImage image;
@@ -150,7 +145,7 @@ void ScanDraiD::processSingleFrame(const std::string& fileName, const unsigned i
 
 
 // setters
-void ScanDraiD::setCameraHFov(const float cameraHFov, bool adjustCameraVFov)
+void ProcessScan::setCameraHFov(const float cameraHFov, bool adjustCameraVFov)
     throw (std::runtime_error)
 {
     if (cameraHFov > 360 || cameraHFov < 0)
@@ -161,55 +156,54 @@ void ScanDraiD::setCameraHFov(const float cameraHFov, bool adjustCameraVFov)
     if (adjustCameraVFov)
         setCameraVFov(cameraHFov_*4.0/5.0);
 }
-void ScanDraiD::setCameraVFov(const float cameraVFov)
+void ProcessScan::setCameraVFov(const float cameraVFov)
     throw (std::runtime_error)
 {
     if (cameraVFov > 360 || cameraVFov < 0)
         throw std::runtime_error("Error: invalid angle for CAMERA_VFOV !");
     cameraVFov_=cameraVFov;
 }
-void ScanDraiD::setCameraDistance(const float cameraDistance)
+void ProcessScan::setCameraDistance(const float cameraDistance)
     throw (std::runtime_error)
 {
     if (cameraDistance <= 0)
         throw std::runtime_error("Error: Distance from camera to center of turntable (=CAMERA_DISTANCE) cannot be <= 0 !");
     cameraDistance_=cameraDistance;
 }
-void ScanDraiD::setLaserOffset(const float laserOffset)
+void ProcessScan::setLaserOffset(const float laserOffset)
     throw (std::runtime_error)
 {
     if (laserOffset > 360 || laserOffset < 0)
-        throw std::runtime_error(gettext("Error: invalid angle for LASER_OFFSET !"));
+        throw std::runtime_error("Error: invalid angle for LASER_OFFSET !");
     laserOffset_=laserOffset;
 }
-void ScanDraiD::setHorizontalAverage(const unsigned int horizAvg)
+void ProcessScan::setHorizontalAverage(const unsigned int horizAvg)
     throw (std::runtime_error)
 {
     if (horizAvg==0)
-        throw std::runtime_error(gettext("Error: value vor horizontal average (=HORIZ_AVG) cannot be 0 !"));
+        throw std::runtime_error("Error: value vor horizontal average (=HORIZ_AVG) cannot be 0 !");
     horizAvg_=horizAvg;
 }
-void ScanDraiD::setVerticalAverage(const unsigned int vertAvg)
+void ProcessScan::setVerticalAverage(const unsigned int vertAvg)
     throw (std::runtime_error)
 {
     if (vertAvg==0)
-        throw std::runtime_error(gettext("Error: value vor verical average (=VERT_AVG) cannot be 0 !"));
+        throw std::runtime_error("Error: value vor verical average (=VERT_AVG) cannot be 0 !");
     vertAvg_=vertAvg;
 }
-void ScanDraiD::setFrameSkip(const unsigned int frameSkip)
+void ProcessScan::setFrameSkip(const unsigned int frameSkip)
     throw (std::runtime_error)
 {
     if (frameSkip==0)
-        throw std::runtime_error(gettext("Error: value for frames to skip (=FRAME_SKIP) cannot be 0 !"));
+        throw std::runtime_error("Error: value for frames to skip (=FRAME_SKIP) cannot be 0 !");
     frameSkip_=frameSkip;
 }
-void ScanDraiD::setLineSkip(const unsigned int lineSkip)
+void ProcessScan::setLineSkip(const unsigned int lineSkip)
     throw (std::runtime_error)
 {
     if (lineSkip==0)
-        throw std::runtime_error(gettext("Error: value for lines to skip (=LINE_SKIP) cannot be 0 !"));
+        throw std::runtime_error("Error: value for lines to skip (=LINE_SKIP) cannot be 0 !");
     lineSkip_=lineSkip;
 }
 
-} // namespace scanDraiD
 

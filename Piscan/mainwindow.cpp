@@ -15,25 +15,17 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "scandraid.h"
+#include "processscan.h"
 #include "exportfile.h"
 //#include "pointcloud.h"
+#include "devicedialog.h"
 
 #include <QSettings>
 #include <QDebug>
 #include <QFileDialog>
-//#include <QDesktopServices>
 #include <QStatusBar>
-
-//ScanDraiD Includes
-#include <stdlib.h>
-#include <libintl.h>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <stdexcept>
-#include <map>
+#include <QSerialPortInfo>
+#include <QThread>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -42,20 +34,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //Load settings
-    QSettings settings("FOSS", "ScanDraiD");
+
+
+  /*  //Load settings
+    QSettings settings("MakerScan", "PiScan");
     if (settings.contains("CAMERA_HFOV") == false){
         qDebug() << "Write Settings\n";
-        setSettings(true, "", "", "", "", "", "", "","");
-
-        QStringList keys = settings.childKeys();
-        qDebug() << keys;
-
-
-        // connect(sender, SIGNAL(destroyed(QObject*)), this, SLOT(objectDestroyed(Qbject*)));
+        setSettings(true, "", "", "", "", "", "", "","","");
     }
-
+*/
     loadSettings();
+    //send the bed diamter to the ui
+    ui->GLScanWidgetui->setBedSize((getSetting("BED_DIA")).toFloat());
 
 }
 
@@ -63,18 +53,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete serialport;
     delete pointcloud;
     delete ui;
 
 }
 
 
-void MainWindow::setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVariant CAMERA_VFOV, QVariant CAMERA_DISTANCE, QVariant LASER_OFFSET, QVariant HORIZ_AVG, QVariant VERT_AVG, QVariant FRAME_SKIP, QVariant LINE_SKIP){
+void MainWindow::setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVariant CAMERA_VFOV, QVariant CAMERA_DISTANCE,
+                             QVariant LASER_OFFSET, QVariant HORIZ_AVG, QVariant VERT_AVG, QVariant FRAME_SKIP, QVariant LINE_SKIP, QVariant BED_DIA){
 
     //Do some checking here to make sure we are using the proper types for the settings.
 
     //initialise the settings configuation
-     QSettings settings("FOSS", "ScanDraiD");
+     QSettings settings("MakerScan", "PiScan");
 
      if (defaultSettings == false){
          qDebug() << "Write New Settings\n";
@@ -87,6 +79,7 @@ void MainWindow::setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVarian
          settings.setValue("VERT_AVG", VERT_AVG);
          settings.setValue("FRAME_SKIP", FRAME_SKIP);
          settings.setValue("LINE_SKIP", LINE_SKIP);
+         settings.setValue("BED_DIA", BED_DIA);
          //settings.endGroup();
      }else{
         qDebug() << "Clear Settings\n";
@@ -99,7 +92,7 @@ void MainWindow::setSettings(bool defaultSettings, QVariant CAMERA_HFOV, QVarian
 
 QVariant MainWindow::getSetting(QString setting){
 
-    QSettings settings("FOSS", "ScanDraiD");
+    QSettings settings("MakerScan", "PiScan");
     QString returnSetting = "";
 
     if (setting == "CAMERA_HFOV"){
@@ -118,7 +111,9 @@ QVariant MainWindow::getSetting(QString setting){
         returnSetting = settings.value("FRAME_SKIP", 1).toString();
     }else if (setting == "LINE_SKIP") {
         returnSetting = settings.value("LINE_SKIP", 1).toString();
-    }
+    }else if (setting == "BED_DIA") {
+    returnSetting = settings.value("BED_DIA", 125).toString();
+}
 
     return returnSetting;
 
@@ -126,7 +121,7 @@ QVariant MainWindow::getSetting(QString setting){
 
 void MainWindow::on_pushButtonResetSettings_clicked()
 {
-    setSettings(true, "", "", "", "", "", "", "","");
+    setSettings(true, "", "", "", "", "", "", "","","");
 }
 
 void MainWindow::on_pushButtonSaveSettings_clicked()
@@ -139,10 +134,10 @@ void MainWindow::on_pushButtonSaveSettings_clicked()
     QVariant VERT_AVG = ui->lineEditVerticalAverage->text();
     QVariant FRAME_SKIP = ui->lineEditFrameSkip->text();
     QVariant LINE_SKIP = ui->lineEditLineSkip->text();
-
+    QVariant BED_DIA = ui->lineEditBedDiameter->text();
     //Add some error checking
 
-    setSettings(false, CAMERA_HFOV, CAMERA_VFOV, CAMERA_DISTANCE, LASER_OFFSET, HORIZ_AVG, VERT_AVG, FRAME_SKIP, LINE_SKIP);
+    setSettings(false, CAMERA_HFOV, CAMERA_VFOV, CAMERA_DISTANCE, LASER_OFFSET, HORIZ_AVG, VERT_AVG, FRAME_SKIP, LINE_SKIP, BED_DIA);
 }
 
 void MainWindow::loadSettings(){
@@ -155,7 +150,7 @@ void MainWindow::loadSettings(){
     ui->lineEditVerticalAverage->setText(getSetting("VERT_AVG").toString());
     ui->lineEditFrameSkip->setText(getSetting("FRAME_SKIP").toString());
     ui->lineEditLineSkip->setText(getSetting("LINE_SKIP").toString());
-
+    ui->lineEditBedDiameter->setText(getSetting("BED_DIA").toString());
     updateStatusBar("Settings Loaded", 3000);
 
 }
@@ -163,16 +158,76 @@ void MainWindow::loadSettings(){
 void MainWindow::on_pushButtonProcessScan_clicked()
 {
 
+    //DeviceSelectionForm *scanpopup = new device(this);
+    DeviceDialog dd(this);
 
+    foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+       // qDebug() << "Name        : " << info.portName();
+       // qDebug() << "Description : " << info.description();
+       // qDebug() << "Manufacturer: " << info.manufacturer();
+       // qDebug() << "Location: " << info.systemLocation();
+       // qDebug() << "ID" << info.productIdentifier();
+
+        if ((info.portName() != "") & (info.description() != "") & (info.manufacturer() != ""))
+         {
+            dd.addToList(info.systemLocation());
+         }
+     }
+
+    QString imageFiles = "From Image Files";
+    dd.addToList(imageFiles);
+
+    if(dd.exec())
+    {
+        scanSource = dd.returnSelection();
+        qDebug() << "Device selected: " << scanSource;
+
+        if(scanSource != imageFiles)
+        {
+            getScanFromDevice();
+        }
+        else
+        {
+            getScanFromFile();
+        }
+
+    }
+
+}
+
+void MainWindow::getScanFromDevice()
+{
+
+    serialport = new QSerialPort(this);
+    serialport->setPortName(scanSource);
+    serialport->open(QIODevice::ReadWrite);
+    serialport->setBaudRate(QSerialPort::Baud115200);
+    serialport->setDataBits(QSerialPort::Data8);
+    serialport->setFlowControl(QSerialPort::NoFlowControl);
+
+   serialport->write("1");
+   serialport->close();
+
+}
+
+void MainWindow::getScanFromFile()
+    {
 
     //TO DO - Use native dialog once bug is resolved with multiple windows and the file browser not closing
+
 
     inDir = QFileDialog::getExistingDirectory(NULL, "Open Directory",QDir::homePath(),QFileDialog::DontUseNativeDialog | QFileDialog::DontResolveSymlinks);
 
     if (inDir != ""){
 
     ui->pushButtonSaveScan->setEnabled(false);
-    scanDraiD::ScanDraiD scanner;
+
+    //ProcessScan scanner(inDir);
+
+    ProcessScan *scanner = new ProcessScan(inDir);
+
+    //processscan::ProcessScan scanner;
 
     if (pointcloud != NULL)
         delete pointcloud;
@@ -180,19 +235,40 @@ void MainWindow::on_pushButtonProcessScan_clicked()
     pointcloud = new pointCloud;
 
     // Make a connection to allow the ScanDraiD scanner object return data.
-    connect(&scanner, SIGNAL(percentageComplete(QString, int)), this, SLOT(updateStatusBar(QString,int)));
-    connect(&scanner, SIGNAL(addPointToCloud(float,float,float)), pointcloud, SLOT(addPoint(float,float,float)));
+    connect(scanner, SIGNAL(percentageComplete(QString, int)), this, SLOT(updateStatusBar(QString,int)));
+    connect(scanner, SIGNAL(percentageComplete(QString, int)), ui->GLScanWidgetui, SLOT(redraw()));
 
-    scanner.setCameraHFov(getSetting("CAMERA_HFOV").toFloat(), true);
-    scanner.setCameraVFov(getSetting("CAMERA_VFOV").toFloat());
-    scanner.setCameraDistance(getSetting("CAMERA_DISTANCE").toFloat());
-    scanner.setLaserOffset(getSetting("LASER_OFFSET").toFloat());
-    scanner.setHorizontalAverage(getSetting("HORIZ_AVG").toInt());
-    scanner.setVerticalAverage(getSetting("VERT_AVG").toInt());
-    scanner.setFrameSkip(getSetting("FRAME_SKIP").toInt());
-    scanner.setLineSkip(getSetting("LINE_SKIP").toInt());
+    connect(scanner, SIGNAL(addPointToCloud(float,float,float)), pointcloud, SLOT(addPoint(float,float,float)));
 
-    scanner.start(inDir);
+    scanner->setCameraHFov(getSetting("CAMERA_HFOV").toFloat(), true);
+    scanner->setCameraVFov(getSetting("CAMERA_VFOV").toFloat());
+    scanner->setCameraDistance(getSetting("CAMERA_DISTANCE").toFloat());
+    scanner->setLaserOffset(getSetting("LASER_OFFSET").toFloat());
+    scanner->setHorizontalAverage(getSetting("HORIZ_AVG").toInt());
+    scanner->setVerticalAverage(getSetting("VERT_AVG").toInt());
+    scanner->setFrameSkip(getSetting("FRAME_SKIP").toInt());
+    scanner->setLineSkip(getSetting("LINE_SKIP").toInt());
+
+    //QThread *process = new QThread;
+    //scanner.moveToThread(process);
+
+    //connect(process, SIGNAL(started()), &scanner, SLOT(start()));
+    //process->start();
+
+
+    QThread* thread = new QThread;
+    //Worker* worker = new Worker();
+    scanner->moveToThread(thread);
+    //connect(scanner, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+    connect(thread, SIGNAL(started()), scanner, SLOT(start()));
+    connect(scanner, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(scanner, SIGNAL(finished()), scanner, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
+
+    //scanner->start();
+
+    //Move this from here. it doesnt work because of the thread
     updateStatusBar("Scan Complete", 3000);
     ui->pushButtonSaveScan->setEnabled(true);
 
@@ -200,10 +276,11 @@ void MainWindow::on_pushButtonProcessScan_clicked()
 
     ui->GLScanWidgetui->setCloud(pointcloud);
 
-    pointcloud->refineCloud();
+    //pointcloud->refineCloud();
 
 
     }
+
 }
 
 void MainWindow::updateStatusBar(QString text, int timeOut){

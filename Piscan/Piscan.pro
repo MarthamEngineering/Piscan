@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,16 +15,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     glscanwidget.cpp \
-    scandraid.cpp \
     exportfile.cpp \
-    pointcloud.cpp
+    pointcloud.cpp \
+    devicedialog.cpp \
+    processscan.cpp
 
 HEADERS  += mainwindow.h \
     glscanwidget.h \
-    scandraid.h \
     exportfile.h \
-    pointcloud.h
+    pointcloud.h \
+    devicedialog.h \
+    processscan.h
 
-#LIBS += -L/usr/lib -ljpeg
-
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    devicedialog.ui

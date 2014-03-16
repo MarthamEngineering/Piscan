@@ -15,8 +15,18 @@ public:
     explicit DeviceDialog(QWidget *parent = 0);
     ~DeviceDialog();
 
+public slots:
+    void addToList(QString item);
+    QString returnSelection();
+
+private slots:
+    void on_listWidget_doubleClicked();
+
+    void on_pushButtonSelect_clicked();
+
 private:
     Ui::DeviceDialog *ui;
+    QString selection;
 };
 
 #endif // DEVICEDIALOG_H

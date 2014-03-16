@@ -26,6 +26,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define PI 3.14159
+
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -33,10 +35,7 @@
 GLScanWidget::GLScanWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
-    //QTime midnight(0, 0, 0);
-    //qsrand(midnight.secsTo(QTime::currentTime()));
 
-    //logo = 0;
     xRot = -75 * 16;;
     yRot = 0;
     zRot = 0;
@@ -48,7 +47,7 @@ GLScanWidget::GLScanWidget(QWidget *parent)
     setAutoFillBackground(false);
     createGradient();
     setMinimumSize(200, 200);
-    //setWindowTitle(tr("Overpainting a Scene"));
+
 }
 
 GLScanWidget::~GLScanWidget()
@@ -88,8 +87,6 @@ void GLScanWidget::initializeGL()
 {
     glEnable(GL_MULTISAMPLE);
 
-    //logo = new QtLogo(this);
-    //logo->setColor(qtGreen.dark());
 }
 
 void GLScanWidget::mousePressEvent(QMouseEvent *event)
@@ -154,10 +151,8 @@ void GLScanWidget::paintEvent(QPaintEvent *event)
     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
     glScalef(scaling, scaling, scaling);
 
-    //logo->draw();
-    //paintGL();
-
-    drawGL();
+    drawBed();
+    drawClouds();
 
     glShadeModel(GL_FLAT);
     glDisable(GL_CULL_FACE);
@@ -175,49 +170,69 @@ void GLScanWidget::paintEvent(QPaintEvent *event)
     painter.end();
 }
 
-void GLScanWidget::drawGL()
+void GLScanWidget::DrawCircle(float r)
 {
-    //Draw Z Axis
+    int num_segments = 48;
+    float theta = 2 * 3.1415926 / num_segments;
+    float tangetial_factor = tanf(theta);//calculate the tangential factor
+    float cx = 0.0;
+    float cy = 0.0;
+
+    float radial_factor = cosf(theta);//calculate the radial factor
+
+    float x = r;//we start at angle = 0
+
+    float y = 0;
+
     glLineWidth(1.5);
-    qglColor(Qt::red);
-    glBegin(GL_LINES);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, 200);
-    glEnd();
-    //renderText(0, 0, 260, "z");
-    //Draw X Axis
-    qglColor(Qt::green);
-    glBegin(GL_LINES);
-    glVertex3f(0, 0, 0);
-    glVertex3f(125, 0, 0);
-    glEnd();
-    //Draw X Axis
-    qglColor(Qt::blue);
-    glBegin(GL_LINES);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 125, 0);
-    glEnd();
-
-
     qglColor(Qt::lightGray);
-    int sections = 36;
-    GLfloat radius = 125;
-    GLfloat twoPi = 2.0 * 3.14159;
 
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_LINE_LOOP);
+    for(int ii = 0; ii < num_segments; ii++)
+    {
+        glVertex2f(x + cx, y + cy);//output vertex
+        float tx = -y;
+        float ty = x;
 
-    glVertex3f(0.0, 0.0, -1.5); //center of triangles
+        //add the tangential vector
+        x += tx * tangetial_factor;
+        y += ty * tangetial_factor;
 
-    for(int i = 0; i <= sections; i++) {
+        //correct using the radial factor
+        x *= radial_factor;
+        y *= radial_factor;
+    }
+    glEnd();
+}
 
-        glVertex3f(radius*cos(i*twoPi / sections),
-                   radius*sin(i*twoPi / sections), -1.5);
+void GLScanWidget::drawBed()
+{
+
+//Draw Bed
+
+    for(float i = BedSize/10.0; i <= BedSize; i+=BedSize/10.0)
+    {
+        DrawCircle(i);
+        //qDebug() << "circle Size: " << i;
     }
 
-    glEnd();
+    //glLineWidth(2.5);
+    for(int i = 0; i <= 4; i++)
+    {
+        qglColor(Qt::darkGray);
+        glBegin(GL_LINES);
+        glVertex3f(BedSize/10.0*cos((2*PI)/4*i), BedSize/10.0*sin((2*PI)/4*i), 0);
+        glVertex3f(BedSize*cos((2*PI)/4*i), BedSize*sin((2*PI)/4*i), 0);
+        glEnd();
+
+        //qDebug() << "line length: " << i;
+    }
+}
 
 
 
+void GLScanWidget::drawClouds()
+{
 
  //Draw Cloud
 
@@ -289,8 +304,6 @@ QSize GLScanWidget::sizeHint() const
 
 void GLScanWidget::setupViewport(int width, int height)
 {
-
-
     int side = qMin(width, height);
     glViewport((width - side) / 2, (height - side) / 2, side, side);
 
@@ -335,6 +348,16 @@ void GLScanWidget::setCloud(pointCloud *cloudptr)
 
 }
 
+void GLScanWidget::setBedSize(float size)
+{
+    BedSize = size;
+    qDebug() << "Bed size: " << BedSize;
+}
+
+void GLScanWidget::redraw()
+{
+    update();
+}
 
 
 

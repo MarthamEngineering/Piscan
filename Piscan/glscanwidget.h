@@ -39,6 +39,9 @@ public slots:
     void setZRotation(int angle);
 
     void setCloud(pointCloud *cloudptr);
+    void setBedSize(float size);
+
+    void redraw();
 
 protected:
     void initializeGL();
@@ -54,7 +57,9 @@ private slots:
 
 private:
 
-    void drawGL();
+    void drawBed();
+    void drawClouds();
+    void DrawCircle(float r);
     void drawInstructions(QPainter *painter);
     void setupViewport(int width, int height);
     //void paintGL();
@@ -68,7 +73,8 @@ private:
     QColor qtPurple;
     QRadialGradient gradient;
 
-    //GLuint object;
+    int BedSize;
+
     int xRot;
     int yRot;
     int zRot;
