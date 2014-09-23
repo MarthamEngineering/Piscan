@@ -19,6 +19,7 @@
 #include "exportfile.h"
 //#include "pointcloud.h"
 #include "devicedialog.h"
+#include "filetransfer.h"
 
 #include <QSettings>
 #include <QDebug>
@@ -26,6 +27,7 @@
 #include <QStatusBar>
 #include <QSerialPortInfo>
 #include <QThread>
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -53,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete serialport;
+
     delete pointcloud;
     delete ui;
 
@@ -199,17 +201,37 @@ void MainWindow::on_pushButtonProcessScan_clicked()
 void MainWindow::getScanFromDevice()
 {
 
-    serialport = new QSerialPort(this);
-    serialport->setPortName(scanSource);
-    serialport->open(QIODevice::ReadWrite);
-    serialport->setBaudRate(QSerialPort::Baud115200);
-    serialport->setDataBits(QSerialPort::Data8);
-    serialport->setFlowControl(QSerialPort::NoFlowControl);
 
-   serialport->write("1");
-   serialport->close();
+    //QString savefileName = QFileDialog::getSaveFileName(this,"Save File", QString(QDir::homePath() + "/untitled.ppm"), ".ppm",0, QFileDialog::DontUseNativeDialog );
+    //QFile file(savefileName);
+    fileTransfer *fileT = new fileTransfer(scanSource);
+
+   if (pointcloud != NULL)
+        delete pointcloud;
+
+
+    pointcloud = new pointCloud;
+    ui->GLScanWidgetui->setCloud(pointcloud);
+
+    //Find the proper place to activate the savebutton
+   ui->pushButtonSaveScan->setEnabled(true);
+
+    connect(fileT, SIGNAL(addPointToCloud(float,float,float)), pointcloud, SLOT(addPoint(float,float,float)));
+
+
+    QThread* thread = new QThread;
+    //Worker* worker = new Worker();
+    fileT->moveToThread(thread);
+    //connect(scanner, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+    connect(thread, SIGNAL(started()), fileT, SLOT(getScan()));
+    connect(fileT, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(fileT, SIGNAL(finished()), fileT, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
 
 }
+
+
 
 void MainWindow::getScanFromFile()
     {

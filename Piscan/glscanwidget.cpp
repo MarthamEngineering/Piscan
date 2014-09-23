@@ -41,8 +41,8 @@ GLScanWidget::GLScanWidget(QWidget *parent)
     zRot = 0;
     scaling = 1.0;
 
-    qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
-    qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
+    //qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
+    //qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
 
     setAutoFillBackground(false);
     createGradient();
@@ -116,8 +116,8 @@ void GLScanWidget::wheelEvent(QWheelEvent *event){
     double numDegrees = -event->delta()/8.0;
     double numSteps = numDegrees / 15.0;
     scaling *= pow(1.25, numSteps);
-    if (scaling > 3){
-        scaling = 3;
+    if (scaling > 3.5){
+        scaling = 3.5;
     }else if (scaling < 0.25){
         scaling = 0.25;
     }

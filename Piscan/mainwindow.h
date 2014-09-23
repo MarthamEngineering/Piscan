@@ -18,10 +18,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSerialPort>
-
-//#include <map>
-//#include <string>
 #include <QtOpenGL>
 #include "processscan.h"
 #include "pointcloud.h"
@@ -46,9 +42,13 @@ private slots:
     void on_pushButtonSaveSettings_clicked();
     void on_pushButtonProcessScan_clicked();
     void on_pushButtonSaveScan_clicked();
+    //void handleReadyRead();
+    //void handleTimeout();
 
 public slots:
     void updateStatusBar(QString text, int timeOut);
+
+
 
 private:
     Ui::MainWindow *ui;
@@ -58,13 +58,13 @@ private:
     void loadSettings();
     void getScanFromDevice();
     void getScanFromFile();
+
     QString scanSource;
 
-    QSerialPort *serialport;
-
-    pointCloud *pointcloud;
+    pointCloud *pointcloud = NULL;
 
     QString inDir;
+
 };
 
 #endif // MAINWINDOW_H

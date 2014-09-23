@@ -53,7 +53,7 @@ void ProcessScan::start()//, std::stringstream& scanResult, std::string& fileTyp
     //getNumberOfFrames(inDir);
     QDir dir(inDir);
     QStringList filters;
-    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.gif";
+    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.gif" << "*.ppm";
     QFileInfoList imageFileList = dir.entryInfoList(filters, QDir::Files|QDir::NoDotAndDotDot);
     numberFrames_ = imageFileList.size();
 
@@ -102,8 +102,8 @@ void ProcessScan::processSingleFrame(const std::string& fileName, const unsigned
             px = image.pixel(i, j*lineSkip_);
             //Bitshift the RGB value and extract just the RED colour brightness
             //brightness = (static_cast<float>((px >> 16) & 0xFF));
-                         
-            
+
+
             brightness = (static_cast<float>((px >> 24) & 0xFF)) / 255.0 +
                          (static_cast<float>((px >> 16) & 0xFF)) / 255.0 +
                          (static_cast<float>((px >>  8) & 0xFF)) / 255.0;             
@@ -127,7 +127,7 @@ void ProcessScan::processSingleFrame(const std::string& fileName, const unsigned
 
             float frameAngle = static_cast<float>(frameNr) * (360.0/static_cast<float>(numberFrames_));
             cameraAngle = cameraHFov_ * (0.5 - static_cast<float>(maxpos) / static_cast<float>(width));
-            float pointAngle = 180.0 - cameraAngle + laserOffset_;
+            float pointAngle = 180.0 - cameraAngle - laserOffset_;
             radius = cameraDistance_ * sin(cameraAngle * DEGREES_TO_RADIANS) / sin(pointAngle * DEGREES_TO_RADIANS);
 
             x = radius * sin(frameAngle * DEGREES_TO_RADIANS);

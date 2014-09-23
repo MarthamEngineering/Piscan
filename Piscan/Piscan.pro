@@ -18,14 +18,16 @@ SOURCES += main.cpp\
     exportfile.cpp \
     pointcloud.cpp \
     devicedialog.cpp \
-    processscan.cpp
+    processscan.cpp \
+    filetransfer.cpp
 
 HEADERS  += mainwindow.h \
     glscanwidget.h \
     exportfile.h \
     pointcloud.h \
     devicedialog.h \
-    processscan.h
+    processscan.h \
+    filetransfer.h
 
 FORMS    += mainwindow.ui \
     devicedialog.ui

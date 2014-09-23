@@ -30,7 +30,7 @@ void pointCloud::addPoint(float x, float y, float z){
    // Invert Z
    // z = 0.0 - z;
 
-    if ((abs(x) < 125) & (abs(y) < 125) & (z > 0) & (z < 125))
+    if ((abs(x) < 125) & (abs(y) < 125) & (z > 0) & (z < 175))
     {
 
     //qDebug() << "Point Added: " << "x:" << x << " y:" << y << " z:" << z;
